@@ -1,0 +1,181 @@
+---
+title: "hw4"
+author: "danielye,ye97@wisc.edu"
+date: "2022/12/6"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Summary
+
+## First write bascic sub scripts. 
+We first should  write a basic and simple script, such as R language, python, etc.Make sure our scripts can run on the case data.
+
+For examples.
+
+```{r eval=FALSE, include=TRUE}
+install.packages("FITSio", repos="https://cran.r-project.org")
+install.packages("tidyverse", repos="https://cran.r-project.org")
+require("FITSio")
+require("tidyverse")
+args = commandArgs(trailingOnly=TRUE)
+
+cb5file='cB58_Lyman_break.fit'
+otherfile=args[1]
+
+
+
+cB58 = readFrameFromFITS("cB58_Lyman_break.fit")
+n_cB58 = length(cB58)
+files = list.files(otherfile)
+n.files = length(files)
+
+distance = function(A, B) {
+  return(sqrt(sum((A - B)^2)))
+}
+
+res = data.frame(min_d=c(),file=c(),best_j=c())
+library(tidyverse)
+for (i in 1:n.files) {
+  path = paste(sep="", otherfile, files[i])
+  # cat(sep="", "path=", path, "\n")
+  noisy = readFrameFromFITS(path)
+  
+  n_noisy = length(noisy$flux)
+  
+  # cat(sep="", "n_cB58=", n_cB58, ", n_noisy=", n_noisy, "\n")
+  
+  min_d = 1000000
+  best_j = 10
+  for (j in 1:(n_noisy - n_cB58)) {
+    slice = noisy$flux[j:(j + n_cB58)]
+    ##print(str(slice))
+    d = distance(cB58$FLUX, slice)
+    if (is.na(d)) {
+      # cat(sep="", "NA at j=", j, "\n")
+    }
+    if (d < min_d) {
+      min_d = d
+      best_j = j
+    }
+    # cat(sep="", "j=", j, ", d=", d, ", best_j=", best_j, ", min_d=", min_d, "\n")
+  }
+  cat(sep=",",min_d,files[i],best_j,"\n")
+  res <- res %>% add_row(min_d=min_d,file=files[i],best_j=best_j)
+}
+
+write.csv(res,"./hw4.csv",row.names=FALSE)
+
+```
+
+
+
+## Pass parameters using shell script
+After we have written the core script, use the parameters as the entry point for the calculation.
+
+Write parameters into the shell script to be passed into the core script code script for easy modification and adjustment at any time.
+
+for examples.
+
+```{r eval=FALSE, include=TRUE}
+#!/bin/bash
+
+# untar your R installation
+tar -xzf R402.tar.gz
+tar -xzf 3586.tgz 3586
+
+# make sure the script will use your R installation, 
+# and the working directory as its home location
+export PATH=$PWD/R/bin:$PATH
+export RHOME=$PWD/R
+export R_LIBS=$PWD/packages
+
+# run your script
+Rscript q3_1.R './3586/'
+
+```
+
+
+
+## Then use CHTC
+
+Finally, we use CHTC to schedule our shell scripts to ensure that the power of the cluster can be used
+
+
+```{r eval=FALSE, include=TRUE}
+universe = vanilla
+log    =    log/q3_1-chtc_$(Cluster)_$(Process).log
+error  =  error/q3_1-chtc_$(Cluster)_$(Process).err
+output = output/q3_1-chtc_$(Cluster)_$(Process).out
+
+
+executable = ./q3_1.sh
+
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,q3_1.R, /home/groups/STAT605/boss/cB58_Lyman_break.fit,/home/groups/STAT605/boss/tgz/3586.tgz
+
+request_cpus = 2
+request_memory = 2GB
+request_disk = 300MB
+
+queue 3
+```
+
+
+
+
+
+
+
+# Result
+
+## read the hw4best.csv
+
+```{r}
+df = read.csv("hw4best100.csv",header = T)
+head(df)
+```
+
+
+
+## Plot 
+
+```{r eval=TRUE, include=TRUE}
+for (x in 0:9){
+  low = x*10 + 1
+  high = x*10 + 10
+  temp = df[c(low:high),][,c('distance','spectrumID')]
+  barplot(temp$distance,names.arg = temp$spectrumID)
+}
+
+```
+
+
+
+# my problem
+While I was writing my homework, I encountered some problems as described below
+
+- I'm new to the shell and new to passing arguments. Spent a lot of time on this block.
+
+- I can use CHTC software and scripts normally, but I don't know how to use its parallel function to guarantee one data one node. More references and examples in class might be helpful.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

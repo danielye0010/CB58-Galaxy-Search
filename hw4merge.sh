@@ -1,0 +1,1 @@
+head -n 1 hw4best100.csv > hw4best100.csv && tail -n+2 -q *.csv >> hw4best100.csv

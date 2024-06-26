@@ -1,0 +1,39 @@
+000 (239909.000.000) 2022-12-05 07:51:15 Job submitted from host: <128.104.100.148:9618?addrs=128.104.100.148-9618+[2607-f388-107c-501-216-3eff-feb2-bc11]-9618&alias=learn.chtc.wisc.edu&noUDP&sock=schedd_6018_6d09>
+...
+040 (239909.000.000) 2022-12-05 07:51:50 Started transferring input files
+	Transferring to host: <128.105.68.215:9618?addrs=128.105.68.215-9618+[2607-f388-2200-100-1e6a-7aff-fe26-7335]-9618&alias=e302.chtc.wisc.edu&noUDP&sock=slot1_4_13892_ebae_78201>
+...
+040 (239909.000.000) 2022-12-05 07:51:54 Finished transferring input files
+...
+001 (239909.000.000) 2022-12-05 07:51:55 Job executing on host: <128.105.68.215:9618?addrs=128.105.68.215-9618+[2607-f388-2200-100-1e6a-7aff-fe26-7335]-9618&alias=e302.chtc.wisc.edu&noUDP&sock=startd_6915_b17c>
+...
+006 (239909.000.000) 2022-12-05 07:52:04 Image size of job updated: 197884
+	192  -  MemoryUsage of job (MB)
+	195756  -  ResidentSetSize of job (KB)
+...
+006 (239909.000.000) 2022-12-05 07:57:05 Image size of job updated: 337504
+	192  -  MemoryUsage of job (MB)
+	195756  -  ResidentSetSize of job (KB)
+...
+040 (239909.000.000) 2022-12-05 07:59:21 Started transferring output files
+...
+040 (239909.000.000) 2022-12-05 07:59:21 Finished transferring output files
+...
+005 (239909.000.000) 2022-12-05 07:59:21 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:07:17, Sys 0 00:00:04  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:07:17, Sys 0 00:00:04  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	41552  -  Run Bytes Sent By Job
+	123840040  -  Run Bytes Received By Job
+	41552  -  Total Bytes Sent By Job
+	123840040  -  Total Bytes Received By Job
+	Partitionable Resources :     Usage  Request Allocated 
+	   Cpus                 :      1.00        2         2 
+	   Disk (KB)            : 491609      307200    663979 
+	   IoHeavy              :                            0 
+	   Memory (MB)          :    192        2048      2048 
+
+	Job terminated of its own accord at 2022-12-05T13:59:21Z with exit-code 0.
+...

@@ -1,41 +1,82 @@
-rm(list=ls())
-install.packages("FITSio")
-require("FITSio")
+#!/usr/bin/env Rscript
 
-cB58 = readFrameFromFITS(args[1],header=TRUE)
-n_cB58 = length(cB58)
-files = list.files(args[2])
-n.files = length(files)
+suppressPackageStartupMessages(library(FITSio))
 
-distance = function(A, B) {
-  return(sqrt(sum((A - B)^2)))
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) < 2) {
+  stop("Usage: Rscript project.R <reference.fits> <spectra_dir> [output.csv]")
 }
 
+reference_file <- args[[1]]
+spectra_dir <- args[[2]]
+output_file <- if (length(args) >= 3) args[[3]] else "results.csv"
 
-for (i in 1:n.files) {
-  path = paste(sep="", "D:\\写作业\\1\\data\\data\\", files[i])
-  # cat(sep="", "path=", path, "\n")
-  noisy = readFrameFromFITS(path)
-  
-  n_noisy = length(noisy$flux)
-  
-  # cat(sep="", "n_cB58=", n_cB58, ", n_noisy=", n_noisy, "\n")
-  
-  min_d = 1000000
-  best_j = 10
-  for (j in 1:(n_noisy - n_cB58)) {
-    slice = noisy$flux[j:(j + n_cB58)]
-    ##print(str(slice))
-    d = distance(cB58$FLUX, slice)
-    if (is.na(d)) {
-      # cat(sep="", "NA at j=", j, "\n")
-    }
-    if (d < min_d) {
-      min_d = d
-      best_j = j
-    }
-    # cat(sep="", "j=", j, ", d=", d, ", best_j=", best_j, ", min_d=", min_d, "\n")
+if (!file.exists(reference_file)) {
+  stop(paste("Reference FITS file not found:", reference_file))
+}
+if (!dir.exists(spectra_dir)) {
+  stop(paste("Spectra directory not found:", spectra_dir))
+}
+
+reference <- readFrameFromFITS(reference_file, header = TRUE)
+if (is.null(reference$FLUX)) {
+  stop("Reference FITS table must contain a FLUX column")
+}
+reference_flux <- as.numeric(reference$FLUX)
+n_reference <- length(reference_flux)
+
+files <- list.files(
+  spectra_dir,
+  pattern = "\\.(fit|fits)$",
+  full.names = TRUE,
+  ignore.case = TRUE
+)
+if (length(files) == 0) {
+  stop(paste("No FITS spectra found in", spectra_dir))
+}
+
+euclidean_distance <- function(a, b) {
+  if (length(a) != length(b) || anyNA(a) || anyNA(b)) {
+    return(Inf)
   }
-  cat(sep=",",min_d,files[i],best_j,"\n")
+  sqrt(sum((a - b)^2))
 }
 
+search_spectrum <- function(path) {
+  spectrum <- readFrameFromFITS(path)
+  if (is.null(spectrum$flux)) {
+    stop(paste("Spectrum FITS table must contain a flux column:", path))
+  }
+
+  flux <- as.numeric(spectrum$flux)
+  n_flux <- length(flux)
+  if (n_flux < n_reference) {
+    return(data.frame(
+      distance = Inf,
+      spectrumID = basename(path),
+      i = NA_integer_
+    ))
+  }
+
+  starts <- seq_len(n_flux - n_reference + 1L)
+  distances <- vapply(
+    starts,
+    function(j) {
+      slice <- flux[j:(j + n_reference - 1L)]
+      euclidean_distance(reference_flux, slice)
+    },
+    numeric(1)
+  )
+
+  best <- which.min(distances)
+  data.frame(
+    distance = distances[[best]],
+    spectrumID = basename(path),
+    i = starts[[best]]
+  )
+}
+
+results <- do.call(rbind, lapply(files, search_spectrum))
+results <- results[order(results$distance), ]
+write.csv(results, output_file, row.names = FALSE)
+cat(sprintf("Searched %d spectra; wrote %s\n", nrow(results), output_file))

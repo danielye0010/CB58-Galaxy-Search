@@ -1,13 +1,18 @@
-module load R/R-3.4.4
+#!/usr/bin/env bash
+set -euo pipefail
 
-RpackagesDir="R/library"
-mkdir --parents "$RpackagesDir"
+if [[ $# -lt 3 ]]; then
+  echo "Usage: $0 <reference.fits> <spectra.tar.gz> <output.csv>" >&2
+  exit 2
+fi
 
-Rscript q2_install_run.R "$RpackagesDir"
+reference="$1"
+archive="$2"
+output="$3"
+workdir="job_data"
 
-tar -oxf data.tar data;
+mkdir -p "$workdir"
+tar -xzf "$archive" -C "$workdir"
 
-
-cb5="cB58_Lyman_break.fit"
-data="./data/"
-Rscript hw4.R "$cb5" "$data"
+# FITSio should be installed in the R environment distributed with the job.
+Rscript project.R "$reference" "$workdir" "$output"

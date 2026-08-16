@@ -1,23 +1,21 @@
-universe = parallel
-log    =    log/q5_1-chtc_$(Cluster)_$(ProcId).log
-error  =  error/q5_1-chtc_$(Cluster)_$(ProcId).err
-output = output/q5_1-chtc_$(Cluster)_$(ProcId).out
+universe = vanilla
+executable = project.sh
 
+# One archive of spectra is processed per job. Create archives.txt with one
+# archive path per line before submitting.
+arguments = cB58_Lyman_break.fit $(archive) result_$(Process).csv
 
-
-machine_count=1
-
-
-arguments = ./file$(ProcId)/
-
-executable = ./hw4_5.sh
+log    = logs/cb58_$(Cluster)_$(Process).log
+error  = logs/cb58_$(Cluster)_$(Process).err
+output = logs/cb58_$(Cluster)_$(Process).out
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz,q3_1.R, /home/groups/STAT605/boss/cB58_Lyman_break.fit,/home/groups/STAT605/boss/tgz/2459.tgz
+transfer_input_files = project.R,project.sh,cB58_Lyman_break.fit,$(archive)
+transfer_output_files = result_$(Process).csv
 
-request_cpus = 3
+request_cpus = 1
 request_memory = 2GB
-request_disk = 2000MB
+request_disk = 2GB
 
-queue
+queue archive from archives.txt

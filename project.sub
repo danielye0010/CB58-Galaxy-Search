@@ -1,9 +1,9 @@
 universe = vanilla
-executable = project.sh
+executable = /bin/bash
 
 # One archive of spectra is processed per job. Create archives.txt with one
 # archive path per line before submitting.
-arguments = cB58_Lyman_break.fit $(archive) result_$(Process).csv
+arguments = project.sh cB58_Lyman_break.fit $(archive) result_$(Process).csv
 
 log    = logs/cb58_$(Cluster)_$(Process).log
 error  = logs/cb58_$(Cluster)_$(Process).err

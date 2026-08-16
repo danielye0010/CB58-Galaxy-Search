@@ -18,11 +18,16 @@ if (!dir.exists(spectra_dir)) {
   stop(paste("Spectra directory not found:", spectra_dir))
 }
 
-reference <- readFrameFromFITS(reference_file, header = TRUE)
-if (is.null(reference$FLUX)) {
-  stop("Reference FITS table must contain a FLUX column")
+extract_flux <- function(frame, source_name) {
+  flux_name <- names(frame)[tolower(names(frame)) == "flux"]
+  if (length(flux_name) == 0) {
+    stop(paste("FITS table must contain a FLUX column:", source_name))
+  }
+  as.numeric(frame[[flux_name[[1]]]])
 }
-reference_flux <- as.numeric(reference$FLUX)
+
+reference <- readFrameFromFITS(reference_file, header = TRUE)
+reference_flux <- extract_flux(reference, reference_file)
 n_reference <- length(reference_flux)
 
 files <- list.files(
@@ -44,12 +49,9 @@ euclidean_distance <- function(a, b) {
 
 search_spectrum <- function(path) {
   spectrum <- readFrameFromFITS(path)
-  if (is.null(spectrum$flux)) {
-    stop(paste("Spectrum FITS table must contain a flux column:", path))
-  }
-
-  flux <- as.numeric(spectrum$flux)
+  flux <- extract_flux(spectrum, path)
   n_flux <- length(flux)
+
   if (n_flux < n_reference) {
     return(data.frame(
       distance = Inf,

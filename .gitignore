@@ -1,0 +1,18 @@
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
+
+# HTCondor runtime files
+logs/
+*.log
+*.err
+*.out
+
+# Local/distributed inputs and intermediate outputs
+archives.txt
+*.tar
+*.tar.gz
+*.tgz
+result_*.csv
+job_data/

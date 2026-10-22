@@ -1,5 +1,7 @@
 # cB58 Galaxy Search — Distributed Spectral Matching
 
+[**Website →**](https://danielye.net/projects/parallel-spectral-search/)
+
 A high-throughput scientific-computing workflow for searching millions of astronomical spectra for candidates resembling **MS 1512-cB58**, a gravitationally lensed high-redshift Lyman-break galaxy.
 
 The project scales a sliding-window spectral similarity search across the UW–Madison Center for High Throughput Computing (CHTC) / HTCondor environment and reduces distributed outputs to the **100 strongest candidate matches**. The original search covered roughly **2.5 million spectra**.
